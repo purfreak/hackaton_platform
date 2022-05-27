@@ -1,1 +1,1 @@
-# hackaton_platform
+# hackathon_platform
