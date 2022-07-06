@@ -13,10 +13,10 @@ router_users = Router()
     response=MeResponse
 )
 def get_me(request, user_id: int):
-    users = User.objects.filter(id=user_id)
-    if not users.exists():
+    user = User.objects.filter(id=user_id).first()
+    if not user:
         raise HttpError(404, "A user with such id wasn't found.")
-    return users.first()
+    return MeResponse(first_name=user.first_name, last_name=user.last_name, email=user.email)
 
 
 @router_users.post(

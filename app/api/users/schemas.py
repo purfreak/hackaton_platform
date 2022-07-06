@@ -6,7 +6,6 @@ class MeResponse(Schema):
     first_name: str
     last_name: str
     email: EmailStr
-    id: int
 
 
 class PassChangeStatus(Schema):

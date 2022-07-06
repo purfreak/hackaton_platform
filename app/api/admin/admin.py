@@ -18,8 +18,7 @@ def get_teams(request):
     team_data = []
 
     for team in teams:
-        team_data.append(
-            TeamsData(id=team.id, name=team.name, hackathon_name=team.hackathon.id))
+        team_data.append(TeamsData(id=team.id, name=team.name, hackathon_name=team.hackathon.id))
     return GetTeamsResponse(teams=team_data)
 
 

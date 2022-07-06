@@ -2,9 +2,8 @@ from django.contrib.auth.models import User
 from ninja import Router
 from ninja.errors import HttpError
 
-from api.hackathons.schemas import HackathonsResponse, HackathonsData, ChooseHackathonResponse, ChooseHackathonRequest, \
-    MakeTeamResponse, MakeTeamRequest, AddRepositoryResponse, AddRepositoryRequest, GetTeamInvitesResponse, InviteList, \
-    PostTeamInvitesRequest
+from api.hackathons.schemas import HackathonsResponse, HackathonsData, MakeTeamRequest, \
+    AddRepositoryRequest, GetTeamInvitesResponse, InviteList, PostTeamInvitesRequest
 from base.models import Hackathon, HackathonParticipant, Team, TeamParticipant
 from utils.dependency import AuthBearer
 
@@ -26,24 +25,22 @@ def get_hackathons(request):
 
 @router_hackathons.post(
     path="/choose",
-    auth=AuthBearer(),
-    response=ChooseHackathonResponse
+    auth=AuthBearer()
 )
-def post_choose_hackathon(request, data: ChooseHackathonRequest):
-    if not Hackathon.objects.filter(id=data.hackathon_id).exists():
+def post_choose_hackathon(request, hackathon_id: int):
+    if not Hackathon.objects.filter(id=hackathon_id).exists():
         raise HttpError(404, "There is no hackathon with such id.")
-    if HackathonParticipant.objects.filter(user=request.auth, hackathon_id=data.hackathon_id).exists():
+    if HackathonParticipant.objects.filter(user=request.auth, hackathon_id=hackathon_id).exists():
         raise HttpError(400, "This user has already registered for this hackathon.")
 
-    HackathonParticipant.objects.create(user=request.auth, hackathon_id=data.hackathon_id)
+    HackathonParticipant.objects.create(user=request.auth, hackathon_id=hackathon_id)
 
-    return ChooseHackathonResponse(status=200)
+    return
 
 
 @router_hackathons.post(
     path="/teams",
-    auth=AuthBearer(),
-    response=MakeTeamResponse
+    auth=AuthBearer()
 )
 def post_make_team(request, data: MakeTeamRequest):
     if Team.objects.filter(name=data.name).exists():
@@ -63,13 +60,12 @@ def post_make_team(request, data: MakeTeamRequest):
         else:
             raise HttpError(400, f"This user {element} hasn't chosen this hackathon.")
 
-    return MakeTeamResponse(status="The team was successfully made.")
+    return
 
 
 @router_hackathons.post(
     path="/teams/repository",
-    auth=AuthBearer(),
-    response=AddRepositoryResponse
+    auth=AuthBearer()
 )
 def post_add_repository(request, data: AddRepositoryRequest):
     captain_query = TeamParticipant.objects.filter(user=request.auth, team__hackathon__id=data.hackathon_id, role='C')
@@ -79,6 +75,7 @@ def post_add_repository(request, data: AddRepositoryRequest):
         captain.save()
     else:
         raise HttpError(400, "You do not have access to adding the repository.")
+    return
 
 
 @router_hackathons.get(
