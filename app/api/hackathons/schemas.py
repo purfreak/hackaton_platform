@@ -17,15 +17,13 @@ class HackathonsResponse(Schema):
     hackathons: List[HackathonsData]
 
 
-class MakeTeamRequest(Schema):
+class CreateTeamRequest(Schema):
     name: str
-    hackathon_id: int
     email_list: List[EmailStr]
 
 
 class AddRepositoryRequest(Schema):
     url: AnyHttpUrl
-    hackathon_id: int
 
 
 class InviteList(Schema):

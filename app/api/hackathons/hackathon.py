@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from ninja import Router
 from ninja.errors import HttpError
 
-from api.hackathons.schemas import HackathonsResponse, HackathonsData, MakeTeamRequest, \
+from api.hackathons.schemas import HackathonsResponse, HackathonsData, CreateTeamRequest, \
     AddRepositoryRequest, GetTeamInvitesResponse, InviteList, PostTeamInvitesRequest
 from base.models import Hackathon, HackathonParticipant, Team, TeamParticipant
 from utils.dependency import AuthBearer
@@ -39,23 +39,23 @@ def post_choose_hackathon(request, hackathon_id: int):
 
 
 @router_hackathons.post(
-    path="/teams",
+    path="/teams/{hackathon_id}/create",
     auth=AuthBearer()
 )
-def post_make_team(request, data: MakeTeamRequest):
+def post_create_team(request, hackathon_id: int, data: CreateTeamRequest):
     if Team.objects.filter(name=data.name).exists():
         raise HttpError(400, "A team with such name already exists. Please choose a different name.")
-    if TeamParticipant.objects.filter(user=request.auth, team__hackathon__id=data.hackathon_id).exists():
+    if TeamParticipant.objects.filter(user=request.auth, team__hackathon__id=hackathon_id).exists():
         raise HttpError(400, "You have already chosen your team for this hackathon.")
 
-    new_team = Team.objects.create(name=data.name, hackathon_id=data.hackathon_id)
+    new_team = Team.objects.create(name=data.name, hackathon_id=hackathon_id)
     TeamParticipant.objects.create(user=request.auth, role='C', team=new_team)
 
     for element in data.email_list:
         user = User.objects.filter(email=element)
-        if TeamParticipant.objects.filter(user__email=element, team__hackathon__id=data.hackathon_id).exists():
+        if TeamParticipant.objects.filter(user__email=element, team__hackathon__id=hackathon_id).exists():
             raise HttpError(400, f"This user {element} has already chosen their team for this hackathon.")
-        if not HackathonParticipant.objects.filter(user__email=element, hackathon__id=data.hackathon_id).exists():
+        if not HackathonParticipant.objects.filter(user__email=element, hackathon__id=hackathon_id).exists():
             TeamParticipant.objects.create(user=user, role='I', team=new_team)
         else:
             raise HttpError(400, f"This user {element} hasn't chosen this hackathon.")
@@ -64,11 +64,11 @@ def post_make_team(request, data: MakeTeamRequest):
 
 
 @router_hackathons.post(
-    path="/teams/repository",
+    path="/teams/{hackathon_id}/repository",
     auth=AuthBearer()
 )
-def post_add_repository(request, data: AddRepositoryRequest):
-    captain_query = TeamParticipant.objects.filter(user=request.auth, team__hackathon__id=data.hackathon_id, role='C')
+def post_add_repository(request, hackathon_id: int, data: AddRepositoryRequest):
+    captain_query = TeamParticipant.objects.filter(user=request.auth, team__hackathon__id=hackathon_id, role='C')
     if captain_query.exists():
         captain = captain_query.first()
         captain.team.url = data.url

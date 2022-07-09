@@ -2,15 +2,17 @@ from django.contrib.auth.models import User
 from ninja import Router
 from ninja.errors import HttpError
 
-from api.admin.schemas import GetTeamsResponse, TeamsData, GetTeamTeamParticipantsResponse, TeamParticipantData,\
-    ResetPasswordRequest, MoveParticipantRequest
-from base.models import Team, TeamParticipant
+from api.admin.schemas import GetTeamsResponse, TeamsData, GetTeamTeamParticipantsResponse, TeamParticipantData, \
+    ResetPasswordRequest, MoveParticipantRequest, AddAdminsRequest
+from base.models import Team, TeamParticipant, Hackathon
+from utils.dependency import AuthBearerAdmin
 
 router_admin = Router()
 
 
 @router_admin.get(
     path="/teams",
+    auth=AuthBearerAdmin(),
     response=GetTeamsResponse
 )
 def get_teams(request):
@@ -24,6 +26,7 @@ def get_teams(request):
 
 @router_admin.get(
     path="/teams/{team_id}/participants",
+    auth=AuthBearerAdmin(),
     response=GetTeamTeamParticipantsResponse
 )
 def get_team_participants(request, team_id: int):
@@ -42,7 +45,8 @@ def get_team_participants(request, team_id: int):
 
 
 @router_admin.put(
-    path="/users/{user_id}/reset_password"
+    path="/users/{user_id}/reset_password",
+    auth=AuthBearerAdmin()
 )
 def put_reset_password(request, user_id: int, data: ResetPasswordRequest):
     user = User.objects.filter(id=user_id).first()
@@ -55,7 +59,8 @@ def put_reset_password(request, user_id: int, data: ResetPasswordRequest):
 
 
 @router_admin.put(
-    path="/teams/{team_id}/move"
+    path="/teams/{team_id}/move",
+    auth=AuthBearerAdmin()
 )
 def put_move_participant(request, team_id: int, data: MoveParticipantRequest):
     participant = TeamParticipant.objects.filter(user__id=data.user_id, team__id=team_id). \
@@ -74,7 +79,8 @@ def put_move_participant(request, team_id: int, data: MoveParticipantRequest):
 
 
 @router_admin.delete(
-    path="/teams/{team_id}/participants"
+    path="/teams/{team_id}/participants",
+    auth=AuthBearerAdmin()
 )
 def delete_team_participant(request, team_id: int, user_id: int):
     participant = TeamParticipant.objects.filter(user__id=user_id, team__id=team_id).first()
@@ -85,3 +91,27 @@ def delete_team_participant(request, team_id: int, user_id: int):
     participant.delete()
 
     return
+
+
+@router_admin.put(
+    path="/users/admin",
+    auth=AuthBearerAdmin()
+)
+def put_add_admins(request, data: AddAdminsRequest):
+    User.objects.filter(email__in=data.email_list).update(is_staff=True)
+
+    return
+
+
+@router_admin.put(
+    path="{hackathon_id}/erase",
+    auth=AuthBearerAdmin()
+)
+def put_erase_leaderboard(request, hackathon_id: int):
+    if not Hackathon.objects.filter(hackathon_id=hackathon_id).exists():
+        raise HttpError(404, "There is no such hackathon.")
+    teams = Team.objects.filter(hackathon_id=hackathon_id)
+    for team in teams:
+        team.score = 0
+        team.save()
+
