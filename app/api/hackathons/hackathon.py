@@ -39,20 +39,23 @@ def post_choose_hackathon(request, hackathon_id: int):
 
 
 @router_hackathons.post(
-    path="/teams/{hackathon_id}/create",
+    path="/teams/create",
     auth=AuthBearer()
 )
 def post_create_team(request, hackathon_id: int, data: CreateTeamRequest):
+    if not HackathonParticipant.objects.filter(user=request.auth, hackathon__id=hackathon_id).exists():
+        raise HttpError(400, "You haven't chosen this hackathon.")
+
     if Team.objects.filter(name=data.name).exists():
         raise HttpError(400, "A team with such name already exists. Please choose a different name.")
     if TeamParticipant.objects.filter(user=request.auth, team__hackathon__id=hackathon_id).exists():
         raise HttpError(400, "You have already chosen your team for this hackathon.")
 
-    new_team = Team.objects.create(name=data.name, hackathon__id=hackathon_id)
+    new_team = Team.objects.create(name=data.name, hackathon_id=hackathon_id)
     TeamParticipant.objects.create(user=request.auth, role='C', team=new_team)
 
     for element in data.email_list:
-        user = User.objects.filter(email=element).fisrt()
+        user = User.objects.filter(email=element).first()
         if not user:
             raise HttpError(404, f"This user {element} doesn't exist.")
         if TeamParticipant.objects.filter(user__email=element, team__hackathon__id=hackathon_id).exists():
@@ -66,11 +69,11 @@ def post_create_team(request, hackathon_id: int, data: CreateTeamRequest):
 
 
 @router_hackathons.post(
-    path="/teams/{hackathon_id}/repository",
+    path="/teams/{team_id}/repository",
     auth=AuthBearer()
 )
-def post_add_repository(request, hackathon_id: int, data: AddRepositoryRequest):
-    captain_query = TeamParticipant.objects.filter(user=request.auth, team__hackathon__id=hackathon_id, role='C')
+def post_add_repository(request, team_id: int, data: AddRepositoryRequest):
+    captain_query = TeamParticipant.objects.filter(user=request.auth, team__id=team_id, role='C')
     if captain_query.exists():
         captain = captain_query.first()
         captain.team.url = data.url

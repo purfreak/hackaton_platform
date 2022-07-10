@@ -21,7 +21,7 @@ def get_teams(request):
     team_data = []
 
     for team in teams:
-        team_data.append(TeamsData(id=team.id, name=team.name, hackathon_name=team.hackathon.id))
+        team_data.append(TeamsData(id=team.id, name=team.name, hackathon_id=team.hackathon.id))
     return GetTeamsResponse(teams=team_data)
 
 
@@ -69,6 +69,7 @@ def put_move_participant(request, team_id: int, user_id: int, team_arriving_id: 
 
     if not participant:
         raise HttpError(404, "There is no such user in this team.")
+    print(participant.team.hackathon.id)
     team = Team.objects.filter(id=team_arriving_id, hackathon__id=participant.team.hackathon.id).first()
     if not team:
         raise HttpError(404, "There is no such team to move the participant to.")

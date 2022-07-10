@@ -7,7 +7,7 @@ from pydantic import EmailStr, validator
 class TeamsData(Schema):
     id: int
     name: str
-    hackathon_name: str
+    hackathon_id: int
 
 
 class GetTeamsResponse(Schema):
