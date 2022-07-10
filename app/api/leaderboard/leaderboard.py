@@ -46,7 +46,7 @@ def post_upload_solution(request, hackathon_id: int, data: UploadSolutionRequest
 
 
 @router_leaderboard.get(
-    path="{hackathon_id}",
+    path="/{hackathon_id}",
     response=GetLeaderboardResponse
 )
 def get_leaderboard(request, hackathon_id: int):
