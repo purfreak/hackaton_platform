@@ -37,10 +37,5 @@ class ResetPasswordRequest(Schema):
         return new_password
 
 
-class MoveParticipantRequest(Schema):
-    user_id: int
-    team_arriving_id: int
-
-
 class AddAdminsRequest(Schema):
     email_list: List[EmailStr]

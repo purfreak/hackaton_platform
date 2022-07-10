@@ -12,13 +12,11 @@ router_users = Router()
 
 @router_users.get(
     path="/me",
+    auth=AuthBearer(),
     response=MeResponse
 )
-def get_me(request, user_id: int):
-    user = User.objects.filter(id=user_id).first()
-    if not user:
-        raise HttpError(404, "A user with such id wasn't found.")
-    return MeResponse(first_name=user.first_name, last_name=user.last_name, email=user.email)
+def get_me(request):
+    return MeResponse(first_name=request.auth.first_name, last_name=request.auth.last_name, email=request.auth.email)
 
 
 @router_users.post(

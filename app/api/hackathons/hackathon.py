@@ -52,7 +52,9 @@ def post_create_team(request, hackathon_id: int, data: CreateTeamRequest):
     TeamParticipant.objects.create(user=request.auth, role='C', team=new_team)
 
     for element in data.email_list:
-        user = User.objects.filter(email=element)
+        user = User.objects.filter(email=element).fisrt()
+        if not user:
+            raise HttpError(404, f"This user {element} doesn't exist.")
         if TeamParticipant.objects.filter(user__email=element, team__hackathon__id=hackathon_id).exists():
             raise HttpError(400, f"This user {element} has already chosen their team for this hackathon.")
         if not HackathonParticipant.objects.filter(user__email=element, hackathon__id=hackathon_id).exists():
@@ -72,7 +74,7 @@ def post_add_repository(request, hackathon_id: int, data: AddRepositoryRequest):
     if captain_query.exists():
         captain = captain_query.first()
         captain.team.url = data.url
-        captain.save()
+        captain.team.save()
     else:
         raise HttpError(400, "You do not have access to adding the repository.")
     return

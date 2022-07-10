@@ -4,7 +4,7 @@ from ninja.files import UploadedFile
 from ninja.errors import HttpError
 
 from api.admin.schemas import GetTeamsResponse, TeamsData, GetTeamTeamParticipantsResponse, TeamParticipantData, \
-    ResetPasswordRequest, MoveParticipantRequest, AddAdminsRequest
+    ResetPasswordRequest, AddAdminsRequest
 from base.models import Team, TeamParticipant, Hackathon
 from utils.dependency import AuthBearerAdmin
 
@@ -60,16 +60,16 @@ def put_reset_password(request, user_id: int, data: ResetPasswordRequest):
 
 
 @router_admin.put(
-    path="/teams/{team_id}/move",
+    path="/teams/{team_id}/participants/{user_id}/move",
     auth=AuthBearerAdmin()
 )
-def put_move_participant(request, team_id: int, data: MoveParticipantRequest):
-    participant = TeamParticipant.objects.filter(user__id=data.user_id, team__id=team_id). \
+def put_move_participant(request, team_id: int, user_id: int, team_arriving_id: int):
+    participant = TeamParticipant.objects.filter(user__id=user_id, team__id=team_id). \
         prefetch_related('team').first()
 
     if not participant:
         raise HttpError(404, "There is no such user in this team.")
-    team = Team.objects.filter(id=data.team_arriving_id, hackathon__id=participant.team.hackathon.id).first()
+    team = Team.objects.filter(id=team_arriving_id, hackathon__id=participant.team.hackathon.id).first()
     if not team:
         raise HttpError(404, "There is no such team to move the participant to.")
 
@@ -80,7 +80,7 @@ def put_move_participant(request, team_id: int, data: MoveParticipantRequest):
 
 
 @router_admin.delete(
-    path="/teams/{team_id}/participants",
+    path="/teams/{team_id}/participants/{user_id}/delete",
     auth=AuthBearerAdmin()
 )
 def delete_team_participant(request, team_id: int, user_id: int):
@@ -104,11 +104,11 @@ def put_add_admins(request, data: AddAdminsRequest):
     return
 
 
-@router_admin.put(
-    path="{hackathon_id}/erase",
+@router_admin.delete(
+    path="/hackathon/{hackathon_id}/leaderboard",
     auth=AuthBearerAdmin()
 )
-def put_erase_leaderboard(request, hackathon_id: int):
+def delete_leaderboard(request, hackathon_id: int):
     if not Hackathon.objects.filter(id=hackathon_id).exists():
         raise HttpError(404, "There is no such hackathon.")
     teams = Team.objects.filter(hackathon__id=hackathon_id)
@@ -116,10 +116,12 @@ def put_erase_leaderboard(request, hackathon_id: int):
         team.score = 0
         team.save()
 
+    return
+
 
 @router_admin.post(
-    path="{hackathon_id}/files",
-    # auth=AuthBearerAdmin()
+    path="/hackathon/{hackathon_id}/files",
+    auth=AuthBearerAdmin()
 )
 def post_upload_files(request, hackathon_id: int, test_py: UploadedFile = File(...), train_py: UploadedFile = File(...),
                       labels_csv: UploadedFile = File(...)):

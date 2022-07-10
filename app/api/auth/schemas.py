@@ -23,3 +23,10 @@ class RegisterRequest(AuthRequest):
     last_name: str
     email: EmailStr
     password: str
+
+    @validator("password", allow_reuse=True)
+    def check_password_len(cls, password):
+        if len(password) < 6:
+            raise ValueError("The password should be at least 6 characters long")
+
+        return password

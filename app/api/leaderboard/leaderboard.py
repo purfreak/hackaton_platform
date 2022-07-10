@@ -7,8 +7,7 @@ from ninja import Router, File
 from ninja.files import UploadedFile
 from ninja.errors import HttpError
 
-from api.leaderboard.schemas import UploadSolutionResponse, UploadSolutionRequest, GetLeaderboardResponse, \
-    LeaderboardData
+from api.leaderboard.schemas import UploadSolutionResponse, GetLeaderboardResponse, LeaderboardData
 from base.models import Team, TeamParticipant, Hackathon
 from utils.dependency import AuthBearer
 
@@ -22,8 +21,8 @@ router_leaderboard = Router()
     auth=AuthBearer(),
     response=UploadSolutionResponse
 )
-def post_upload_solution(request, hackathon_id: int, data: UploadSolutionRequest, file: UploadedFile = File(...)):
-    team = Team.objects.filter(id=data.team_id).first()
+def post_upload_solution(request, hackathon_id: int, team_id: int, file: UploadedFile = File(...)):
+    team = Team.objects.filter(id=team_id).first()
     hackathon = Hackathon.objects.filter(id=hackathon_id).first()
     if not (hackathon.start_date <= datetime.datetime.now() <= hackathon.end_date):
         raise HttpError(400, "The hackathon has ended or hasn't started.")

@@ -17,6 +17,7 @@ def post_register(request, data: RegisterRequest):
         raise HttpError(400, "A user with such e-mail already exists.")
 
     user = User.objects.create_user(
+        username=data.email,
         email=data.email,
         password=data.password,
         first_name=data.first_name,
