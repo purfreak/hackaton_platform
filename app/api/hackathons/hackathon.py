@@ -2,8 +2,7 @@ from django.contrib.auth.models import User
 from ninja import Router
 from ninja.errors import HttpError
 
-from api.hackathons.schemas import HackathonsResponse, HackathonsData, CreateTeamRequest, \
-    AddRepositoryRequest, GetTeamInvitesResponse, InviteList, PostTeamInvitesRequest
+from api.hackathons.schemas import HackathonsResponse, HackathonsData, CreateTeamRequest, AddRepositoryRequest
 from base.models import Hackathon, HackathonParticipant, Team, TeamParticipant
 from utils.dependency import AuthBearer
 
@@ -28,12 +27,13 @@ def get_hackathons(request):
     auth=AuthBearer()
 )
 def post_choose_hackathon(request, hackathon_id: int):
-    if not Hackathon.objects.filter(id=hackathon_id).exists():
+    hackathon = Hackathon.objects.filter(id=hackathon_id).first()
+    if not hackathon:
         raise HttpError(404, "There is no hackathon with such id.")
-    if HackathonParticipant.objects.filter(user=request.auth, hackathon_id=hackathon_id).exists():
+    if HackathonParticipant.objects.filter(user=request.auth, hackathon=hackathon).exists():
         raise HttpError(400, "This user has already registered for this hackathon.")
 
-    HackathonParticipant.objects.create(user=request.auth, hackathon_id=hackathon_id)
+    HackathonParticipant.objects.create(user=request.auth, hackathon=hackathon)
 
     return
 
@@ -48,7 +48,7 @@ def post_create_team(request, hackathon_id: int, data: CreateTeamRequest):
     if TeamParticipant.objects.filter(user=request.auth, team__hackathon__id=hackathon_id).exists():
         raise HttpError(400, "You have already chosen your team for this hackathon.")
 
-    new_team = Team.objects.create(name=data.name, hackathon_id=hackathon_id)
+    new_team = Team.objects.create(name=data.name, hackathon__id=hackathon_id)
     TeamParticipant.objects.create(user=request.auth, role='C', team=new_team)
 
     for element in data.email_list:
@@ -78,37 +78,3 @@ def post_add_repository(request, hackathon_id: int, data: AddRepositoryRequest):
     return
 
 
-@router_hackathons.get(
-    path="/teams/invites",
-    auth=AuthBearer(),
-    response=GetTeamInvitesResponse
-)
-def get_team_invites(request):
-    user = request.auth
-    invites = []
-    list_of_invites = TeamParticipant.objects.filter(user=user, role='I')
-    for element in list_of_invites:
-        invites.append(InviteList(team=element.team.name,
-                                  hackathon=element.team.hackathon.name,
-                                  start_date=element.team.hackathon.start_time,
-                                  end_date=element.team.hackathon.end_time))
-
-    return GetTeamInvitesResponse(invites=invites)
-
-
-@router_hackathons.post(
-    path="/teams/invite",
-    auth=AuthBearer()
-)
-def post_team_invites(request, data: PostTeamInvitesRequest):
-    if data.status == PostTeamInvitesRequest.InviteEnum.accepted:
-        user = TeamParticipant.objects.filter(user=request.auth, team__id=data.team_id).first()
-        user.role = 'T'
-        user.save()
-
-    if data.status == PostTeamInvitesRequest.InviteEnum.declined:
-        user = TeamParticipant.objects.filter(user=request.auth, team__id=data.team_id).first()
-        user.role = 'D'
-        user.save()
-
-    return

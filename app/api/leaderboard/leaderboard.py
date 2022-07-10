@@ -27,8 +27,7 @@ def post_upload_solution(request, hackathon_id: int, data: UploadSolutionRequest
     hackathon = Hackathon.objects.filter(id=hackathon_id).first()
     if not (hackathon.start_date <= datetime.datetime.now() <= hackathon.end_date):
         raise HttpError(400, "The hackathon has ended or hasn't started.")
-
-    if not Team.objects.filter(id=data.team_id).exists():
+    if not team:
         raise HttpError(404, "There is no team with such id.")
     if not TeamParticipant.objects.filter(user=request.auth, team=team).exists():
         raise HttpError(404, "You can not upload the solution.")
@@ -51,7 +50,7 @@ def post_upload_solution(request, hackathon_id: int, data: UploadSolutionRequest
     response=GetLeaderboardResponse
 )
 def get_leaderboard(request, hackathon_id: int):
-    teams = Team.objects.filter(hackathon_id=hackathon_id).order_by('-score')
+    teams = Team.objects.filter(hackathon__id=hackathon_id).order_by('-score')
     leaderboard = []
 
     for team in teams:

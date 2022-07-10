@@ -1,3 +1,7 @@
+from datetime import datetime
+from enum import Enum
+from typing import List
+
 from ninja import Schema
 from pydantic import validator, EmailStr
 
@@ -22,3 +26,24 @@ class ChangePassRequest(Schema):
             raise ValueError("The password should be at least 6 characters long")
 
         return new_password
+
+
+class InviteList(Schema):
+    team_name: str
+    hackathon_name: str
+    start_date: datetime
+    end_date: datetime
+
+
+class GetTeamInvitesResponse(Schema):
+    invites: List[InviteList]
+
+
+class PostTeamInvitesRequest(Schema):
+    class InviteEnum(str, Enum):
+        accepted = 'accepted'
+        declined = 'declined'
+
+    team_id: int
+    status: InviteEnum
+
