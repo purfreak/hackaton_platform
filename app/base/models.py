@@ -8,6 +8,10 @@ class Hackathon(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
+    test_py = models.FileField(null=True, blank=True)
+    train_py = models.FileField(null=True, blank=True)
+    labels_csv = models.FileField(null=True, blank=True)
+
     def __str__(self):
         return f'{self.name}'
 

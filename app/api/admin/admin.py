@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
-from ninja import Router
+from ninja import Router, File
+from ninja.files import UploadedFile
 from ninja.errors import HttpError
 
 from api.admin.schemas import GetTeamsResponse, TeamsData, GetTeamTeamParticipantsResponse, TeamParticipantData, \
@@ -68,7 +69,7 @@ def put_move_participant(request, team_id: int, data: MoveParticipantRequest):
 
     if not participant:
         raise HttpError(404, "There is no such user in this team.")
-    team = Team.objects.filter(id=data.team_arriving_id, hackathon_id=participant.team.hackathon.id).first()
+    team = Team.objects.filter(id=data.team_arriving_id, hackathon__id=participant.team.hackathon.id).first()
     if not team:
         raise HttpError(404, "There is no such team to move the participant to.")
 
@@ -108,10 +109,25 @@ def put_add_admins(request, data: AddAdminsRequest):
     auth=AuthBearerAdmin()
 )
 def put_erase_leaderboard(request, hackathon_id: int):
-    if not Hackathon.objects.filter(hackathon_id=hackathon_id).exists():
+    if not Hackathon.objects.filter(id=hackathon_id).exists():
         raise HttpError(404, "There is no such hackathon.")
-    teams = Team.objects.filter(hackathon_id=hackathon_id)
+    teams = Team.objects.filter(hackathon__id=hackathon_id)
     for team in teams:
         team.score = 0
         team.save()
 
+
+@router_admin.post(
+    path="{hackathon_id}/files",
+    # auth=AuthBearerAdmin()
+)
+def post_upload_files(request, hackathon_id: int, test_py: UploadedFile = File(...), train_py: UploadedFile = File(...),
+                      labels_csv: UploadedFile = File(...)):
+    hackathon = Hackathon.objects.filter(id=hackathon_id).first()
+    if not hackathon:
+        raise HttpError(404, "There is no such hackathon.")
+
+    hackathon.test_py = test_py
+    hackathon.train_py = train_py
+    hackathon.labels_csv = labels_csv
+    hackathon.save()
