@@ -2,10 +2,10 @@ from django.contrib.auth.models import User
 from ninja import Router
 from ninja.errors import HttpError
 
-from api.users.schemas import MeResponse, PassChangeStatus, ChangePassRequest, GetTeamInvitesResponse, InviteList, \
+from app.api.users.schemas import MeResponse, PassChangeStatus, ChangePassRequest, GetTeamInvitesResponse, InviteList, \
     PostTeamInvitesRequest
-from base.models import TeamParticipant
-from utils.dependency import AuthBearer
+from app.base.models import TeamParticipant
+from app.utils.dependency import AuthBearer
 
 router_users = Router()
 

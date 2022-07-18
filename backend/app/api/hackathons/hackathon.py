@@ -2,9 +2,9 @@ from django.contrib.auth.models import User
 from ninja import Router
 from ninja.errors import HttpError
 
-from api.hackathons.schemas import HackathonsResponse, HackathonsData, CreateTeamRequest, AddRepositoryRequest
-from base.models import Hackathon, HackathonParticipant, Team, TeamParticipant
-from utils.dependency import AuthBearer
+from app.api.hackathons.schemas import HackathonsResponse, HackathonsData, CreateTeamRequest, AddRepositoryRequest
+from app.base.models import Hackathon, HackathonParticipant, Team, TeamParticipant
+from app.utils.dependency import AuthBearer
 
 router_hackathons = Router()
 

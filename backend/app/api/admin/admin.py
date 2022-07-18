@@ -3,10 +3,10 @@ from ninja import Router, File
 from ninja.files import UploadedFile
 from ninja.errors import HttpError
 
-from api.admin.schemas import GetTeamsResponse, TeamsData, GetTeamTeamParticipantsResponse, TeamParticipantData, \
+from app.api.admin.schemas import GetTeamsResponse, TeamsData, GetTeamTeamParticipantsResponse, TeamParticipantData, \
     ResetPasswordRequest, AddAdminsRequest
-from base.models import Team, TeamParticipant, Hackathon
-from utils.dependency import AuthBearerAdmin
+from app.base.models import Team, TeamParticipant, Hackathon
+from app.utils.dependency import AuthBearerAdmin
 
 router_admin = Router()
 

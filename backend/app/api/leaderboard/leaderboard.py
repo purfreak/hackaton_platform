@@ -7,9 +7,9 @@ from ninja import Router, File
 from ninja.files import UploadedFile
 from ninja.errors import HttpError
 
-from api.leaderboard.schemas import UploadSolutionResponse, GetLeaderboardResponse, LeaderboardData
-from base.models import Team, TeamParticipant, Hackathon
-from utils.dependency import AuthBearer
+from app.api.leaderboard.schemas import UploadSolutionResponse, GetLeaderboardResponse, LeaderboardData
+from app.base.models import Team, TeamParticipant, Hackathon
+from app.utils.dependency import AuthBearer
 
 # from sklearn.metrics import f1_score
 

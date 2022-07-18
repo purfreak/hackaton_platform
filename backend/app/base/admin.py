@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from base.models import Hackathon, TeamParticipant, HackathonParticipant, Team, Leaderboard
+from app.base.models import Hackathon, TeamParticipant, HackathonParticipant, Team, Leaderboard
 
 
 class LeaderboardAdmin(admin.ModelAdmin):
