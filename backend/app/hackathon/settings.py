@@ -74,10 +74,20 @@ WSGI_APPLICATION = 'hackathon.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+POSTGRES_HOST = environ.get("POSTGRES_HOST", "127.0.0.1")
+POSTGRES_PORT = int(environ.get("POSTGRES_PORT", 5432))
+POSTGRES_USER = environ.get("POSTGRES_USER", "postgres")
+POSTGRES_PASSWORD = environ.get("POSTGRES_PASSWORD", "postgres")
+POSTGRES_DB = environ.get("POSTGRES_DB", "postgres")
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': POSTGRES_DB,
+        'USER': POSTGRES_USER,
+        'PASSWORD': POSTGRES_PASSWORD,
+        'HOST': POSTGRES_HOST,
+        'PORT': POSTGRES_PORT,
     }
 }
 
@@ -104,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 

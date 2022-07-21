@@ -1,10 +1,10 @@
 from ninja import NinjaAPI
 
-from app.api.admin.admin import router_admin
-from app.api.auth.auth import router_auth
-from app.api.hackathons.hackathon import router_hackathons
-from app.api.leaderboard.leaderboard import router_leaderboard
-from app.api.users.user import router_users
+from api.admin.admin import router_admin
+from api.auth.auth import router_auth
+from api.hackathons.hackathon import router_hackathons
+from api.leaderboard.leaderboard import router_leaderboard
+from api.users.user import router_users
 
 api = NinjaAPI()
 

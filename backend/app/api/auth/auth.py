@@ -2,8 +2,8 @@ from django.contrib.auth.models import User
 from ninja import Router
 from ninja.errors import HttpError
 
-from app.api.auth.schemas import AccessToken, RegisterRequest, AuthRequest
-from app.utils.security import create_access_token
+from api.auth.schemas import AccessToken, RegisterRequest, AuthRequest
+from utils.security import create_access_token
 
 router_auth = Router()
 

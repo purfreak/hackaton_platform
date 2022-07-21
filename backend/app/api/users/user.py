@@ -1,11 +1,9 @@
-from django.contrib.auth.models import User
 from ninja import Router
-from ninja.errors import HttpError
 
-from app.api.users.schemas import MeResponse, PassChangeStatus, ChangePassRequest, GetTeamInvitesResponse, InviteList, \
+from api.users.schemas import MeResponse, PassChangeStatus, ChangePassRequest, GetTeamInvitesResponse, InviteList, \
     PostTeamInvitesRequest
-from app.base.models import TeamParticipant
-from app.utils.dependency import AuthBearer
+from base.models import TeamParticipant
+from utils.dependency import AuthBearer
 
 router_users = Router()
 
@@ -60,7 +58,7 @@ def post_team_invites(request, data: PostTeamInvitesRequest):
         user.role = 'T'
         user.save()
 
-    if data.status == PostTeamInvitesRequest.InviteEnum.declined:
+    elif data.status == PostTeamInvitesRequest.InviteEnum.declined:
         user = TeamParticipant.objects.filter(user=request.auth, team__id=data.team_id).first()
         user.role = 'D'
         user.save()
