@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#! /bin/sh
 
 echo "# Run migrations"
 python manage.py migrate

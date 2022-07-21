@@ -13,7 +13,6 @@ RUN pip install --upgrade pip && pip install --no-cache-dir --upgrade -r /app/re
 
 COPY ./app /app
 
-RUN ["chmod", "+x", "./start.sh"]
+RUN chmod +x ./start.sh
 
 CMD ./start.sh
-#ENTRYPOINT ["tail", "-f", "/dev/null"]
